@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><?= appConfig.appTitle ?></title>
+  <style>
+    :root {
+      --bg: #f6f7fb;
+      --card: #ffffff;
+      --text: #222;
+      --muted: #667085;
+      --line: #d9e1ee;
+      --primary: #2f6fed;
+      --primary-soft: #e9eefc;
+      --danger-bg: #fff1f1;
+      --danger-text: #b42318;
+      --success: #067647;
+      --green: #1f9d55;
+      --shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+    }
+
+    .container {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 12px 12px 28px;
+    }
+
+    .sticky-panel {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      background: rgba(246, 247, 251, 0.97);
+      backdrop-filter: blur(8px);
+      padding: 10px 0 12px;
+      margin-bottom: 10px;
+    }
+
+    .action-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    button {
+      border: none;
+      border-radius: 12px;
+      min-height: 48px;
+      padding: 12px 14px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-soft { background: var(--primary-soft); color: #1f3d7a; }
+    .btn-danger { background: var(--danger-bg); color: var(--danger-text); grid-column: 1 / -1; }
+
+    button:disabled {
+      opacity: 0.55;
+      cursor: default;
+    }
+
+    .save-note, .status-note, .cloud-note {
+      margin: 8px 2px 0;
+      font-size: 12px;
+      line-height: 1.6;
+      color: var(--muted);
+    }
+
+    .status-note {
+      min-height: 18px;
+      font-weight: 700;
+      color: #1d3557;
+    }
+
+    .header-card,
+    .info-card,
+    .summary-box,
+    .check-card {
+      background: var(--card);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+    }
+
+    .header-card {
+      padding: 18px 16px;
+      margin-bottom: 14px;
+      border-left: 6px solid var(--primary);
+    }
+
+    .header-card h1 {
+      margin: 0 0 8px;
+      font-size: 22px;
+      line-height: 1.4;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: #555;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .cloud-meta {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid #eef2f7;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .cloud-meta a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    .info-card {
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    .field label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 6px;
+      font-size: 13px;
+    }
+
+    .input,
+    .textarea {
+      width: 100%;
+      border: 1px solid #cfd6e4;
+      border-radius: 10px;
+      background: #fafbff;
+      color: var(--text);
+      outline: none;
+      font-family: inherit;
+    }
+
+    .input {
+      height: 46px;
+      padding: 10px 12px;
+      font-size: 16px;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    .textarea {
+      min-height: 120px;
+      padding: 12px 14px;
+      font-size: 16px;
+      line-height: 1.6;
+      resize: vertical;
+    }
+
+    .input:focus,
+    .textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(47, 111, 237, 0.12);
+      background: #fff;
+    }
+
+    .summary-box {
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .summary-box h2,
+    .check-section h2 {
+      margin-top: 0;
+      font-size: 18px;
+    }
+
+    .summary-box ol,
+    .summary-box ul {
+      margin: 10px 0 0;
+      padding-left: 20px;
+      font-size: 14px;
+    }
+
+    .check-section { margin-bottom: 20px; }
+
+    .check-section h2 {
+      font-size: 18px;
+      margin-bottom: 12px;
+      padding-left: 10px;
+      border-left: 5px solid var(--green);
+    }
+
+    .check-card {
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+
+    .check-card h3 {
+      margin: 0 0 8px;
+      font-size: 17px;
+      line-height: 1.5;
+      color: #1d3557;
+    }
+
+    .purpose {
+      margin: 0 0 14px;
+      padding: 10px 12px;
+      background: #eef4ff;
+      border-radius: 10px;
+      color: #24406a;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .check-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .check-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 12px 0;
+      border-bottom: 1px solid #edf0f5;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    .check-list li:last-child { border-bottom: none; }
+
+    .check-list input[type="checkbox"] {
+      margin-top: 2px;
+      width: 22px;
+      height: 22px;
+      flex-shrink: 0;
+      accent-color: var(--primary);
+    }
+
+    .memo,
+    .upload-section {
+      margin-top: 14px;
+    }
+
+    .memo label,
+    .upload-label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 6px;
+      font-size: 13px;
+    }
+
+    .image-input {
+      width: 100%;
+      font-size: 14px;
+      padding: 10px 0;
+    }
+
+    .upload-note {
+      margin-top: 4px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .image-preview {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .image-preview img {
+      width: 100%;
+      max-height: 320px;
+      object-fit: cover;
+      border-radius: 12px;
+      border: 1px solid #d9e1ee;
+      background: #fff;
+      cursor: zoom-in;
+      display: block;
+    }
+
+    .image-empty {
+      grid-column: 1 / -1;
+      padding: 14px;
+      border: 1px dashed #cfd6e4;
+      border-radius: 10px;
+      background: #fafbff;
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+    }
+
+    .record-box {
+      margin-top: 10px;
+      padding: 10px 12px;
+      background: #f8fafc;
+      border: 1px solid #e4e7ec;
+      border-radius: 10px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.7;
+      word-break: break-all;
+    }
+
+    .record-box strong {
+      color: #1d3557;
+    }
+
+    .image-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.82);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 9999;
+    }
+
+    .image-modal.active { display: flex; }
+
+    .image-modal-inner {
+      width: 100%;
+      max-width: 900px;
+      position: relative;
+    }
+
+    .image-modal img {
+      width: 100%;
+      max-height: 88vh;
+      object-fit: contain;
+      border-radius: 12px;
+      background: #111;
+      display: block;
+    }
+
+    .image-modal-close {
+      position: absolute;
+      top: -44px;
+      right: 0;
+      border: none;
+      background: rgba(255, 255, 255, 0.16);
+      color: #fff;
+      min-width: 40px;
+      height: 40px;
+      border-radius: 999px;
+      font-size: 22px;
+      cursor: pointer;
+    }
+
+    .image-modal-hint {
+      margin-top: 10px;
+      text-align: center;
+      color: #fff;
+      font-size: 13px;
+    }
+
+    .loading {
+      padding: 16px;
+      color: var(--muted);
+      font-size: 14px;
+      text-align: center;
+    }
+
+    @media (min-width: 481px) {
+      .container {
+        max-width: 720px;
+        padding: 20px 16px 36px;
+      }
+
+      .info-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .action-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+
+      .btn-danger {
+        grid-column: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <section class="sticky-panel">
+      <div class="action-grid">
+        <button type="button" class="btn-primary" id="submitBtn">Googleシートへ保存</button>
+        <button type="button" class="btn-soft" id="saveDraftBtn">下書き保存</button>
+        <button type="button" class="btn-soft" id="loadDraftBtn">下書き読込</button>
+        <button type="button" class="btn-danger" id="clearDraftBtn">下書き削除・画面クリア</button>
+      </div>
+      <p class="save-note">同じ記録IDのまま保存すると、Googleシート上では上書き更新されます。</p>
+      <div class="status-note" id="statusText"></div>
+    </section>
+
+    <header class="header-card">
+      <h1 id="appTitle"><?= appConfig.appTitle ?></h1>
+      <p class="subtitle">Google Sheets 保存版。チェック結果・SVメモはシートへ、添付画像は Google Drive へ保存します。</p>
+      <div class="cloud-meta">
+        保存先シート: <a href="<?= appConfig.spreadsheetUrl ?>" target="_blank" rel="noopener noreferrer"><?= appConfig.spreadsheetName ?></a><br>
+        保存タブ: <?= appConfig.sheetName ?><br>
+        画像フォルダ: <?= appConfig.imageFolderName ?>
+      </div>
+    </header>
+
+    <section class="info-card">
+      <div class="info-grid">
+        <div class="field">
+          <label for="storeName">店舗名</label>
+          <input class="input" id="storeName" type="text" autocomplete="organization">
+        </div>
+        <div class="field">
+          <label for="checkDate">確認日</label>
+          <input class="input" id="checkDate" type="date">
+        </div>
+        <div class="field">
+          <label for="svName">確認者（SV）</label>
+          <input class="input" id="svName" type="text" autocomplete="name">
+        </div>
+        <div class="field">
+          <label for="managerName">店長名</label>
+          <input class="input" id="managerName" type="text" autocomplete="name">
+        </div>
+      </div>
+
+      <div class="record-box">
+        <div><strong>記録ID:</strong> <span id="recordIdView">未作成</span></div>
+        <div><strong>モード:</strong> <span id="saveModeView">新規作成</span></div>
+      </div>
+    </section>
+
+    <section class="summary-box">
+      <h2>優先順位</h2>
+      <ol>
+        <li>事故を起こさない</li>
+        <li>品質をぶらさない</li>
+        <li>オペレーションを詰まらせない</li>
+        <li>欠品とロスをコントロールする</li>
+        <li>2日目以降も再現できる形にする</li>
+      </ol>
+    </section>
+
+    <section class="check-section">
+      <h2>チェック項目</h2>
+      <div id="sectionsRoot">
+        <div class="loading">読み込み中...</div>
+      </div>
+    </section>
+
+    <section class="summary-box">
+      <h2>最終確認</h2>
+      <ul>
+        <li>衛生安全 → オペレーション → 品質 → 欠品ロス → 改善力 の順で確認する</li>
+        <li>初日は「崩れない店をつくる日」</li>
+        <li>2日目は「修正して、型にする日」</li>
+        <li>Googleシートへ保存すると、各大項目ごとのチェック済み項目・メモ・画像リンクが1行で記録されます</li>
+      </ul>
+    </section>
+  </div>
+
+  <div class="image-modal" id="imageModal">
+    <div class="image-modal-inner">
+      <button type="button" class="image-modal-close" id="imageModalClose">×</button>
+      <img id="imageModalImg" src="" alt="拡大画像">
+      <div class="image-modal-hint">画面をタップ、または × で閉じます</div>
+    </div>
+  </div>
+
+  <script>
+    const APP_CONFIG = <?!= JSON.stringify(appConfig) ?>;
+    const LOCAL_STORAGE_KEY = 'onigiri_sv_checklist_record_id';
+    const DB_NAME = 'OnigiriSvChecklistDB';
+    const STORE_NAME = 'drafts';
+    const DRAFT_KEY = 'latest';
+    const MAX_EDGE = 1600;
+    const JPEG_QUALITY = 0.82;
+
+    const statusText = document.getElementById('statusText');
+    const sectionsRoot = document.getElementById('sectionsRoot');
+    const submitBtn = document.getElementById('submitBtn');
+    const saveDraftBtn = document.getElementById('saveDraftBtn');
+    const loadDraftBtn = document.getElementById('loadDraftBtn');
+    const clearDraftBtn = document.getElementById('clearDraftBtn');
+    const recordIdView = document.getElementById('recordIdView');
+    const saveModeView = document.getElementById('saveModeView');
+    const imageModal = document.getElementById('imageModal');
+    const imageModalImg = document.getElementById('imageModalImg');
+    const imageModalClose = document.getElementById('imageModalClose');
+
+    const state = {
+      recordId: localStorage.getItem(LOCAL_STORAGE_KEY) || '',
+      sections: []
+    };
+
+    function setStatus(message, isError = false) {
+      statusText.textContent = message || '';
+      statusText.style.color = isError ? '#b42318' : '#1d3557';
+    }
+
+    function updateRecordBox() {
+      recordIdView.textContent = state.recordId || '未作成';
+      saveModeView.textContent = state.recordId ? '上書き更新' : '新規作成';
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    function renderSections() {
+      sectionsRoot.innerHTML = APP_CONFIG.sections.map((section) => `
+        <article class="check-card" data-section-id="${section.id}">
+          <h3>${section.number}. ${escapeHtml(section.title)}</h3>
+          <p class="purpose">${escapeHtml(section.purpose)}</p>
+          <ul class="check-list">
+            ${section.items.map((item, idx) => `
+              <li>
+                <input type="checkbox" id="${section.id}_check_${idx}">
+                <label for="${section.id}_check_${idx}">${escapeHtml(item)}</label>
+              </li>
+            `).join('')}
+          </ul>
+          <div class="memo">
+            <label for="${section.id}_memo">SVメモ</label>
+            <textarea class="textarea" id="${section.id}_memo"></textarea>
+          </div>
+          <div class="upload-section">
+            <label class="upload-label" for="${section.id}_images">画像添付</label>
+            <input class="image-input" id="${section.id}_images" type="file" accept="image/*" multiple>
+            <div class="upload-note">スマホで撮影した写真も選択できます。保存時に軽量化して Google Drive へ送信します。</div>
+            <div class="image-preview">
+              <div class="image-empty">画像が未選択です</div>
+            </div>
+          </div>
+        </article>
+      `).join('');
+
+      state.sections = APP_CONFIG.sections.map((section) => {
+        const card = sectionsRoot.querySelector(`[data-section-id="${section.id}"]`);
+        const memo = card.querySelector('.textarea');
+        const checks = Array.from(card.querySelectorAll('input[type="checkbox"]'));
+        const input = card.querySelector('.image-input');
+        const preview = card.querySelector('.image-preview');
+
+        const sectionState = {
+          id: section.id,
+          title: section.title,
+          items: section.items,
+          card,
+          memo,
+          checks,
+          input,
+          preview,
+          selectedFiles: [],
+          savedImages: []
+        };
+
+        input.addEventListener('change', () => {
+          sectionState.selectedFiles = Array.from(input.files || []);
+          renderImages(sectionState, sectionState.selectedFiles);
+        });
+
+        return sectionState;
+      });
+    }
+
+    function openImageModal(src, alt = '拡大画像') {
+      imageModalImg.src = src;
+      imageModalImg.alt = alt;
+      imageModal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeImageModal() {
+      imageModal.classList.remove('active');
+      imageModalImg.src = '';
+      document.body.style.overflow = '';
+    }
+
+    function renderImages(sectionState, images) {
+      const preview = sectionState.preview;
+      preview.innerHTML = '';
+
+      if (!images || !images.length) {
+        preview.innerHTML = '<div class="image-empty">画像が未選択です</div>';
+        return;
+      }
+
+      images.forEach((image) => {
+        const img = document.createElement('img');
+        if (image instanceof File) {
+          const objectUrl = URL.createObjectURL(image);
+          img.src = objectUrl;
+          img.alt = image.name;
+          img.onload = () => URL.revokeObjectURL(objectUrl);
+        } else {
+          img.src = image.dataUrl;
+          img.alt = image.name || 'saved-image';
+        }
+        img.addEventListener('click', () => openImageModal(img.src, img.alt));
+        preview.appendChild(img);
+      });
+    }
+
+    function openDb() {
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, 1);
+
+        request.onupgradeneeded = () => {
+          const db = request.result;
+          if (!db.objectStoreNames.contains(STORE_NAME)) {
+            db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+          }
+        };
+
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+    }
+
+    async function putDraft(data) {
+      const db = await openDb();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE_NAME, 'readwrite');
+        tx.objectStore(STORE_NAME).put({ id: DRAFT_KEY, ...data });
+        tx.oncomplete = () => {
+          db.close();
+          resolve();
+        };
+        tx.onerror = () => {
+          db.close();
+          reject(tx.error);
+        };
+      });
+    }
+
+    async function getDraft() {
+      const db = await openDb();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE_NAME, 'readonly');
+        const request = tx.objectStore(STORE_NAME).get(DRAFT_KEY);
+        request.onsuccess = () => resolve(request.result || null);
+        request.onerror = () => reject(request.error);
+        tx.oncomplete = () => db.close();
+        tx.onerror = () => {
+          db.close();
+          reject(tx.error);
+        };
+      });
+    }
+
+    async function deleteDraft() {
+      const db = await openDb();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE_NAME, 'readwrite');
+        tx.objectStore(STORE_NAME).delete(DRAFT_KEY);
+        tx.oncomplete = () => {
+          db.close();
+          resolve();
+        };
+        tx.onerror = () => {
+          db.close();
+          reject(tx.error);
+        };
+      });
+    }
+
+    function fileToDataUrl(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function compressImageFile(file) {
+      const originalDataUrl = await fileToDataUrl(file);
+      const image = await new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = originalDataUrl;
+      });
+
+      const ratio = Math.min(1, MAX_EDGE / Math.max(image.width, image.height));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.max(1, Math.round(image.width * ratio));
+      canvas.height = Math.max(1, Math.round(image.height * ratio));
+
+      const context = canvas.getContext('2d');
+      context.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+      const compressedDataUrl = canvas.toDataURL('image/jpeg', JPEG_QUALITY);
+
+      return {
+        name: replaceExtension(file.name || 'image.jpg', 'jpg'),
+        type: 'image/jpeg',
+        dataUrl: compressedDataUrl
+      };
+    }
+
+    function replaceExtension(name, extension) {
+      if (/\.[^.]+$/.test(name)) {
+        return name.replace(/\.[^.]+$/, '') + '.' + extension;
+      }
+      return name + '.' + extension;
+    }
+
+    function formatDateTime(value) {
+      if (!value) return '';
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return '';
+      return date.toLocaleString('ja-JP');
+    }
+
+    function getMetaFields() {
+      return {
+        storeName: document.getElementById('storeName').value.trim(),
+        checkDate: document.getElementById('checkDate').value,
+        svName: document.getElementById('svName').value.trim(),
+        managerName: document.getElementById('managerName').value.trim()
+      };
+    }
+
+    async function collectSectionsForSubmit() {
+      return Promise.all(state.sections.map(async (sectionState) => {
+        const checkedItems = sectionState.checks
+          .map((checkbox, index) => checkbox.checked ? sectionState.items[index] : null)
+          .filter(Boolean);
+
+        const images = sectionState.selectedFiles.length
+          ? await Promise.all(sectionState.selectedFiles.map(compressImageFile))
+          : sectionState.savedImages;
+
+        return {
+          id: sectionState.id,
+          title: sectionState.title,
+          checkedItems,
+          memo: sectionState.memo.value,
+          images
+        };
+      }));
+    }
+
+    async function collectDraftData() {
+      const sections = await Promise.all(state.sections.map(async (sectionState) => {
+        const selected = sectionState.selectedFiles.length
+          ? await Promise.all(sectionState.selectedFiles.map(compressImageFile))
+          : sectionState.savedImages;
+
+        return {
+          id: sectionState.id,
+          memo: sectionState.memo.value,
+          checks: sectionState.checks.map(check => check.checked),
+          images: selected
+        };
+      }));
+
+      return {
+        recordId: state.recordId || '',
+        savedAt: new Date().toISOString(),
+        meta: getMetaFields(),
+        sections
+      };
+    }
+
+    function applyDraft(draft) {
+      if (!draft) return;
+
+      const meta = draft.meta || {};
+      document.getElementById('storeName').value = meta.storeName || '';
+      document.getElementById('checkDate').value = meta.checkDate || '';
+      document.getElementById('svName').value = meta.svName || '';
+      document.getElementById('managerName').value = meta.managerName || '';
+
+      state.recordId = draft.recordId || '';
+      localStorage.setItem(LOCAL_STORAGE_KEY, state.recordId || '');
+      updateRecordBox();
+
+      (draft.sections || []).forEach((savedSection) => {
+        const sectionState = state.sections.find(section => section.id === savedSection.id);
+        if (!sectionState) return;
+
+        sectionState.memo.value = savedSection.memo || '';
+        sectionState.checks.forEach((check, index) => {
+          check.checked = Boolean(savedSection.checks && savedSection.checks[index]);
+        });
+
+        sectionState.savedImages = Array.isArray(savedSection.images) ? savedSection.images : [];
+        sectionState.selectedFiles = [];
+        sectionState.input.value = '';
+        renderImages(sectionState, sectionState.savedImages);
+      });
+    }
+
+    function clearForm() {
+      document.getElementById('storeName').value = '';
+      document.getElementById('checkDate').value = '';
+      document.getElementById('svName').value = '';
+      document.getElementById('managerName').value = '';
+
+      state.sections.forEach((sectionState) => {
+        sectionState.memo.value = '';
+        sectionState.checks.forEach(check => { check.checked = false; });
+        sectionState.savedImages = [];
+        sectionState.selectedFiles = [];
+        sectionState.input.value = '';
+        renderImages(sectionState, []);
+      });
+
+      state.recordId = '';
+      localStorage.removeItem(LOCAL_STORAGE_KEY);
+      updateRecordBox();
+    }
+
+    async function saveDraft() {
+      try {
+        setStatus('下書きを保存中...');
+        const draft = await collectDraftData();
+        await putDraft(draft);
+        setStatus(`下書きを保存しました（${formatDateTime(draft.savedAt)}）`);
+      } catch (error) {
+        console.error(error);
+        setStatus('下書き保存に失敗しました。画像サイズが大きすぎる可能性があります。', true);
+      }
+    }
+
+    async function loadDraft(showMessage = true) {
+      try {
+        const draft = await getDraft();
+        if (!draft) {
+          if (showMessage) setStatus('保存済みの下書きはありません。', true);
+          return;
+        }
+        applyDraft(draft);
+        if (showMessage) setStatus(`下書きを読み込みました（${formatDateTime(draft.savedAt)}）`);
+      } catch (error) {
+        console.error(error);
+        setStatus('下書き読込に失敗しました。', true);
+      }
+    }
+
+    async function clearDraftAndForm() {
+      const confirmed = window.confirm('下書きを削除して、画面の入力内容も消去します。よろしいですか？');
+      if (!confirmed) return;
+
+      try {
+        await deleteDraft();
+        clearForm();
+        setStatus('下書きを削除して画面をクリアしました。');
+      } catch (error) {
+        console.error(error);
+        setStatus('下書き削除に失敗しました。', true);
+      }
+    }
+
+    async function submitToGoogleSheets() {
+      try {
+        submitBtn.disabled = true;
+        setStatus('Googleシートへ保存中...');
+
+        const meta = getMetaFields();
+        if (!meta.storeName) {
+          throw new Error('店舗名を入力してください。');
+        }
+        if (!meta.checkDate) {
+          throw new Error('確認日を入力してください。');
+        }
+
+        const sections = await collectSectionsForSubmit();
+        const payload = {
+          recordId: state.recordId || '',
+          ...meta,
+          sections
+        };
+
+        google.script.run
+          .withSuccessHandler((result) => {
+            state.recordId = result.recordId;
+            localStorage.setItem(LOCAL_STORAGE_KEY, state.recordId);
+            updateRecordBox();
+            setStatus(`Googleシートへ保存しました（${result.mode === 'updated' ? '上書き更新' : '新規作成'} / ${formatDateTime(result.savedAt)}）`);
+            submitBtn.disabled = false;
+          })
+          .withFailureHandler((error) => {
+            console.error(error);
+            const message = error && error.message ? error.message : 'Googleシート保存に失敗しました。';
+            setStatus(message, true);
+            submitBtn.disabled = false;
+          })
+          .upsertChecklist(payload);
+      } catch (error) {
+        console.error(error);
+        submitBtn.disabled = false;
+        setStatus(error.message || 'Googleシート保存に失敗しました。', true);
+      }
+    }
+
+    imageModalClose.addEventListener('click', closeImageModal);
+    imageModal.addEventListener('click', (event) => {
+      if (event.target === imageModal || event.target === imageModalImg) {
+        closeImageModal();
+      }
+    });
+
+    submitBtn.addEventListener('click', submitToGoogleSheets);
+    saveDraftBtn.addEventListener('click', saveDraft);
+    loadDraftBtn.addEventListener('click', () => loadDraft(true));
+    clearDraftBtn.addEventListener('click', clearDraftAndForm);
+
+    renderSections();
+    updateRecordBox();
+    loadDraft(false);
+  </script>
+</body>
+</html>
